@@ -40,7 +40,7 @@ The angle is a categorical slot for each band. The exact values of all four ring
 
 **Interactions**
 
-- Hover a wedge to isolate it and read its rings.
+- Hover a wedge to lift that slice toward the viewer and read its rings; other slices stay at full strength. The evidence ledger follows and scrolls back to its previous position on leave.
 - Click a wedge (or ledger row) to pull that slice forward and open a floating member card with off-formula traits.
 - Reorder by chronology or formula rank.
 - Filter by birth decade or to low-confidence bands.

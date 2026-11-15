@@ -43,7 +43,9 @@ const state = {
   spotlight: false,
   selected: null,
   hovered: null,
-  visible: []
+  visible: [],
+  rankingScroll: null,
+  rankingRestoreTimer: null
 };
 
 /* ---------- helpers ---------- */
@@ -390,7 +392,7 @@ function render() {
 
     // Events.
     group
-      .on("pointerenter", (event) => { setHovered(band.id); showTooltip(event, band); })
+      .on("pointerenter", (event) => { setHovered(band.id, "chart"); showTooltip(event, band); })
       .on("pointermove", (event) => moveTooltip(event))
       .on("pointerleave", () => { setHovered(null); hideTooltip(); })
       .on("click", (event) => { event.stopPropagation(); selectBand(band.id); })
@@ -420,37 +422,79 @@ function render() {
 
 /* ---------- emphasis ---------- */
 
-function setHovered(id) {
+function setHovered(id, source = "chart") {
+  if (id) {
+    clearTimeout(state.rankingRestoreTimer);
+    state.rankingRestoreTimer = null;
+  }
+
+  if (source === "chart" && id && state.rankingScroll === null) {
+    state.rankingScroll = $("#ranking").scrollTop;
+  }
+
   state.hovered = id;
   applyEmphasis();
   document.querySelectorAll(".rank-row").forEach((row) => {
     row.classList.toggle("is-hot", row.dataset.id === id);
   });
+
+  if (source === "chart" && id) revealRankingRow(id);
+  if (!id && source === "list") scheduleRankingRestore();
+}
+
+function scheduleRankingRestore() {
+  clearTimeout(state.rankingRestoreTimer);
+  state.rankingRestoreTimer = window.setTimeout(restoreRankingScroll, 80);
+}
+
+function revealRankingRow(id) {
+  const container = $("#ranking");
+  const row = [...container.querySelectorAll(".rank-row")].find((item) => item.dataset.id === id);
+  if (!row) return;
+
+  const view = container.getBoundingClientRect();
+  const item = row.getBoundingClientRect();
+  const edge = 10;
+  const limit = container.scrollHeight - container.clientHeight;
+  let target = container.scrollTop;
+
+  if (item.top < view.top + edge) {
+    target += item.top - view.top - edge;
+  } else if (item.bottom > view.bottom - edge) {
+    target += item.bottom - view.bottom + edge;
+  }
+
+  target = Math.max(0, Math.min(limit, target));
+  if (Math.abs(target - container.scrollTop) > 1) {
+    container.scrollTo({ top: target, behavior: "auto" });
+  }
+}
+
+function restoreRankingScroll() {
+  clearTimeout(state.rankingRestoreTimer);
+  state.rankingRestoreTimer = null;
+  if (state.rankingScroll === null) return;
+  const target = state.rankingScroll;
+  state.rankingScroll = null;
+  $("#ranking").scrollTo({ top: target, behavior: "auto" });
 }
 
 function applyEmphasis() {
   const top10 = visibleTop10();
   const focus = new Set([state.hovered, state.selected].filter(Boolean));
-  const slot = (Math.PI * 2) / Math.max(1, state.visible.length);
 
   d3.selectAll(".band").each(function () {
     const id = this.dataset.id;
     const g = d3.select(this);
     const isFocus = focus.has(id);
-    const out = (focus.size && !isFocus) || (state.spotlight && !top10.has(id) && !isFocus);
+    const out = state.spotlight && !top10.has(id) && !isFocus;
     g.classed("dim", out);
     g.classed("hot", state.hovered === id);
     g.classed("is-selected-band", state.selected === id);
     g.attr("aria-pressed", state.selected === id ? "true" : "false");
 
-    const index = state.visible.findIndex((band) => band.id === id);
-    const mid = -Math.PI / 2 + (index + 0.5) * slot;
-    const push = state.selected === id ? 18 : 0;
-    g.style("transform", `translate(${Math.cos(mid) * push}px, ${Math.sin(mid) * push}px)`);
-
-    if (state.selected === id) {
-      this.parentNode.appendChild(this);
-    }
+    const lift = state.selected === id ? 1.11 : state.hovered === id ? 1.075 : 1;
+    g.style("transform", `scale(${lift})`);
 
     if (state.selected === id) {
       const band = state.bands.find((b) => b.id === id);
@@ -466,6 +510,13 @@ function applyEmphasis() {
       g.selectAll(".member-dot").classed("is-off-formula", false);
     }
   });
+
+  if (state.selected) {
+    d3.selectAll(".band").filter(function () { return this.dataset.id === state.selected; }).raise();
+  }
+  if (state.hovered) {
+    d3.selectAll(".band").filter(function () { return this.dataset.id === state.hovered; }).raise();
+  }
 
   document.querySelectorAll(".rank-row").forEach((row) => {
     row.classList.toggle("is-selected", row.dataset.id === state.selected);
@@ -585,6 +636,7 @@ function updateSubtitle() {
 
 function renderRanking() {
   const container = $("#ranking");
+  state.rankingScroll = null;
   container.hidden = false;
   container.innerHTML = "";
 
@@ -608,8 +660,8 @@ function renderRanking() {
       </span>
       <span class="confidence-dot ${low ? "is-low" : "is-solid"}" title="${low ? "Low confidence" : "Solid evidence"}" aria-label="${low ? "Low confidence" : "Solid evidence"}"></span>
       <span class="rank-val">${band.score}</span>`;
-    row.addEventListener("pointerenter", () => setHovered(band.id));
-    row.addEventListener("pointerleave", () => setHovered(null));
+    row.addEventListener("pointerenter", () => setHovered(band.id, "list"));
+    row.addEventListener("pointerleave", () => setHovered(null, "list"));
     row.addEventListener("click", () => selectBand(band.id));
     container.appendChild(row);
   });
@@ -756,6 +808,17 @@ function wireControls() {
   });
 
   $("#low-confidence").addEventListener("click", () => setLowOnly(!state.lowOnly));
+
+  $("#ranking").addEventListener("wheel", () => {
+    clearTimeout(state.rankingRestoreTimer);
+    state.rankingRestoreTimer = null;
+    state.rankingScroll = null;
+  }, { passive: true });
+
+  $("#chart").addEventListener("pointerleave", () => {
+    setHovered(null, "chart");
+    scheduleRankingRestore();
+  });
 
   $("#spotlight").addEventListener("click", () => {
     state.spotlight = !state.spotlight;
