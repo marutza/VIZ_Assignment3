@@ -425,7 +425,7 @@ function applyEmphasis() {
     const id = this.dataset.id;
     const g = d3.select(this);
     const isFocus = focus.has(id);
-    const out = (focus.size && !isFocus) || (state.spotlight && !top10.has(id) && !isFocus);
+    const out = state.spotlight && !top10.has(id) && !isFocus;
     g.classed("dim", out);
     g.classed("hot", state.hovered === id);
     g.classed("is-selected-band", state.selected === id);
@@ -433,12 +433,8 @@ function applyEmphasis() {
 
     const index = state.visible.findIndex((band) => band.id === id);
     const mid = -Math.PI / 2 + (index + 0.5) * slot;
-    const push = state.selected === id ? 18 : 0;
+    const push = state.selected === id ? 20 : state.hovered === id ? 14 : 0;
     g.style("transform", `translate(${Math.cos(mid) * push}px, ${Math.sin(mid) * push}px)`);
-
-    if (state.selected === id) {
-      this.parentNode.appendChild(this);
-    }
 
     if (state.selected === id) {
       const band = state.bands.find((b) => b.id === id);
@@ -454,6 +450,13 @@ function applyEmphasis() {
       g.selectAll(".member-dot").classed("is-off-formula", false);
     }
   });
+
+  if (state.selected) {
+    d3.selectAll(".band").filter(function () { return this.dataset.id === state.selected; }).raise();
+  }
+  if (state.hovered) {
+    d3.selectAll(".band").filter(function () { return this.dataset.id === state.hovered; }).raise();
+  }
 
   document.querySelectorAll(".rank-row").forEach((row) => {
     row.classList.toggle("is-selected", row.dataset.id === state.selected);

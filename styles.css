@@ -376,9 +376,12 @@ main { max-width: 1580px; margin: 0 auto; padding: 0 clamp(24px, 4vw, 64px); }
 
 #chart { width: 100%; height: 100%; display: block; overflow: visible; cursor: crosshair; }
 
-.band { transition: transform .38s cubic-bezier(.2,.82,.25,1); }
+.band { transition: transform .38s cubic-bezier(.2,.82,.25,1), opacity .2s ease; }
 .band:focus { outline: none; }
 .band:focus-visible .band-arc { stroke: var(--red); stroke-width: 2.5; }
+@media (prefers-reduced-motion: reduce) {
+  .band { transition-duration: .01ms; }
+}
 
 .connector {
   position: absolute;
@@ -607,10 +610,11 @@ footer {
 .band-spoke { stroke: var(--rule); stroke-width: .6; }
 .ring-label { display: none; font-family: var(--mono); font-size: 9.5px; fill: var(--muted); letter-spacing: .06em; paint-order: stroke; stroke: var(--paper); stroke-width: 3px; stroke-linejoin: round; }
 .dim { opacity: .25 !important; }
-.hot .band-arc { filter: brightness(1.14); }
+.hot .band-arc { filter: brightness(1.1) drop-shadow(0 4px 3px rgba(23,25,29,.24)); }
 .hot .band-label { fill: var(--red); font-weight: 500; }
 .hot .band-spoke { stroke: var(--ink); }
-.hot .ring-fill { filter: brightness(1.15); }
+.hot .ring-fill { filter: brightness(1.12); }
+.hot .member-dot { stroke-width: 2.4; }
 .is-selected-band .band-arc { stroke: var(--ink); stroke-width: 2.4; filter: drop-shadow(0 3px 0 rgba(23,25,29,.2)); }
 .is-selected-band .band-label, .is-selected-band .score-label { opacity: 0; }
 .is-selected-band .band-spoke { stroke: var(--ink); }
