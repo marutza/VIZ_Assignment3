@@ -1,5 +1,5 @@
 /* ============================================================
-   The Boyband Blueprint — radial uniformity index
+   The Boyband Blueprint — radial formula index
    Data → aggregate → geometry → interaction
    ============================================================ */
 
@@ -8,11 +8,13 @@ const CX = 480;
 const CY = 480;
 
 const RING_METRICS = [
-  { key: "hairColor", label: "hair colour", radius: 196 },
-  { key: "hairLength", label: "hair length", radius: 164 },
-  { key: "shirt", label: "shirt colour", radius: 132 },
-  { key: "bottom", label: "trouser colour", radius: 100 }
+  { key: "hairColor", label: "hair colour", radius: 196, color: "#b33b2b" },
+  { key: "hairLength", label: "hair length", radius: 164, color: "#cf962d" },
+  { key: "shirt", label: "shirt colour", radius: 132, color: "#2d6c82" },
+  { key: "bottom", label: "trouser colour", radius: 100, color: "#5b7c4d" }
 ];
+
+const DOT_TOTAL = 234;
 
 const HAIR_COLORS = [
   ["black", "#17191d"],
@@ -37,6 +39,7 @@ const state = {
   bands: [],
   order: "chrono",
   era: "all",
+  lowOnly: false,
   spotlight: false,
   selected: null,
   hovered: null,
@@ -189,9 +192,10 @@ function slotAngles(count) {
 const heightScale = d3.scaleLinear().domain([64, 78]).range([2.4, 7.4]).clamp(true);
 
 function filteredBands() {
-  const bands = state.era === "all"
+  let bands = state.era === "all"
     ? state.bands
     : state.bands.filter((band) => band.era === state.era);
+  if (state.lowOnly) bands = bands.filter((band) => band.members.length <= 4);
 
   if (state.order === "rank") {
     return [...bands].sort((a, b) => b.score - a.score || a.band.localeCompare(b.band));
@@ -211,7 +215,17 @@ function render() {
   const svg = d3.select("#chart");
   svg.selectAll("*").remove();
 
-  if (!state.visible.length) return;
+  if (!state.visible.length) {
+    svg.append("text")
+      .attr("class", "empty-note")
+      .attr("x", CX).attr("y", CY)
+      .attr("text-anchor", "middle")
+      .text("No bands match these filters.");
+    updateHub();
+    updateSubtitle();
+    renderRanking();
+    return;
+  }
 
   const defs = svg.append("defs");
   defs.append("pattern")
@@ -250,6 +264,7 @@ function render() {
     const rot = (labelAt * 180) / Math.PI + 90;
     ringLabels.append("text")
       .attr("class", "ring-label")
+      .attr("style", `fill:${metric.color}`)
       .attr("x", sx).attr("y", sy)
       .attr("text-anchor", "middle")
       .attr("transform", `rotate(${rot} ${sx} ${sy})`)
@@ -265,7 +280,7 @@ function render() {
       .attr("data-id", band.id)
       .attr("tabindex", 0)
       .attr("role", "button")
-      .attr("aria-label", `${band.band}, ${band.members.length} members, uniformity ${band.score} of 100`);
+      .attr("aria-label", `${band.band}, ${band.members.length} members${band.members.length <= 4 ? ", low confidence" : ""}, formula strength ${band.score} of 100`);
 
     // Invisible full-wedge hit target.
     group.append("path")
@@ -286,30 +301,47 @@ function render() {
       const m = band.metrics[metric.key];
       group.append("path")
         .attr("class", "ring-track")
+        .attr("fill", metric.color)
+        .attr("fill-opacity", 0.16)
         .attr("transform", `translate(${CX} ${CY})`)
         .attr("d", arcPath(metric.radius - 7, metric.radius + 7, start, end));
       if (m.ratio > 0) {
         group.append("path")
           .attr("class", "ring-fill")
-          .attr("fill", ERA_COLORS[band.era])
+          .attr("fill", metric.color)
           .attr("transform", `translate(${CX} ${CY})`)
           .attr("d", arcPath(metric.radius - 7, metric.radius + 7, start, start + (end - start) * m.ratio));
       }
+      [0.25, 0.5, 0.75].forEach((t) => {
+        const a = start + (end - start) * t;
+        group.append("line")
+          .attr("class", "ring-tick")
+          .attr("x1", CX + Math.sin(a) * (metric.radius - 7))
+          .attr("y1", CY - Math.cos(a) * (metric.radius - 7))
+          .attr("x2", CX + Math.sin(a) * (metric.radius + 7))
+          .attr("y2", CY - Math.cos(a) * (metric.radius + 7));
+      });
     });
 
-    // Member dots.
+    // Member dots: visible hollow state for missing height.
     band.members.forEach((member, i) => {
       const r = 220 + i * 10.4;
       const px = CX + Math.cos(mid) * r;
       const py = CY + Math.sin(mid) * r;
       const color = (HAIR_COLORS.find(([label]) => label === member.hairColor) || HAIR_COLORS[5])[1];
-      const dot = group.append("circle")
-        .attr("class", "member-dot")
+      const missing = !member.height;
+      group.append("circle")
+        .attr("class", `member-dot${missing ? " is-missing" : ""}`)
         .attr("cx", px).attr("cy", py)
-        .attr("fill", member.height ? color : "#f2ede2")
-        .attr("stroke", member.height ? "#f2ede2" : color)
-        .attr("r", member.height ? heightScale(member.height) : 2.4);
-      if (!member.height) dot.attr("stroke-dasharray", "1 1");
+        .attr("fill", missing ? "#f2ede2" : color)
+        .attr("r", missing ? 4.5 : heightScale(member.height));
+      if (missing) {
+        group.append("circle")
+          .attr("class", "member-pip")
+          .attr("cx", px).attr("cy", py)
+          .attr("fill", color)
+          .attr("r", 1.6);
+      }
     });
 
     // Data arc: depth = member count.
@@ -328,7 +360,7 @@ function render() {
       .attr("y", CY + Math.sin(mid) * sr)
       .attr("text-anchor", "middle")
       .attr("dominant-baseline", "middle")
-      .text(band.score);
+      .text(`${band.score}${band.members.length <= 4 ? "○" : ""}`);
 
     const lr = 374;
     const lx = CX + Math.cos(mid) * lr;
@@ -359,6 +391,12 @@ function render() {
   });
 
   ringLabels.raise();
+
+  const dotCount = root.selectAll(".member-dot").size();
+  svg.attr("data-dot-count", dotCount).attr("data-dot-expected", state.visible.reduce((sum, band) => sum + band.members.length, 0));
+  if (dotCount !== Number(svg.attr("data-dot-expected"))) {
+    console.error(`Dot count mismatch: ${dotCount}`);
+  }
 
   svg.on("click", () => closeDetail());
 
@@ -479,7 +517,8 @@ function positionPopover(id) {
 function showTooltip(event, band) {
   if (band.id === state.selected) { hideTooltip(); return; }
   const tt = $("#tooltip");
-  tt.innerHTML = `<strong>${band.band}</strong>${band.members.length} members · <span class="tt-score">${band.score}/100 uniform</span><br>click to inspect`;
+  const low = band.members.length <= 4;
+  tt.innerHTML = `<strong>${band.band}</strong>${band.members.length} members${low ? " · <span class=\"tt-low\">low confidence</span>" : ""}<br><span class="tt-score">${band.score}/100 formula</span><br>click to inspect`;
   tt.classList.add("is-on");
   moveTooltip(event);
 }
@@ -504,7 +543,7 @@ function updateHub() {
     hub.classList.remove("is-selected");
     $("#hub-kicker").textContent = "THE DIAL";
     $("#hub-value").textContent = avg;
-    $(".hub-label").textContent = "average uniformity";
+    $(".hub-label").textContent = "average formula strength";
     $("#hub-meta").textContent = `${state.visible.length} bands · ${state.visible.reduce((s, b) => s + b.members.length, 0)} members`;
     $(".hub-hint").innerHTML = "Hover to read a band.<br>Click to inspect its members.";
     return;
@@ -514,17 +553,20 @@ function updateHub() {
   hub.classList.add("is-selected");
   $("#hub-kicker").textContent = `${band.era.toUpperCase()} · ${band.members.length} MEMBERS`;
   $("#hub-value").textContent = band.score;
-  $(".hub-label").textContent = "uniformity";
-  $("#hub-meta").textContent = "evidence card open";
+  $(".hub-label").textContent = "formula strength";
+  $("#hub-meta").textContent = `${band.members.length <= 4 ? "LOW CONFIDENCE · " : ""}n=${band.members.length} · card open`;
   $(".hub-hint").innerHTML = "";
 }
 
 function updateSubtitle() {
   const total = state.visible.length;
-  $("#chart-subtitle").textContent = `${total} band${total === 1 ? "" : "s"} · 0 = every look different · 100 = one repeated look`;
-  $("#filter-status").textContent = state.era === "all"
-    ? `Showing all ${total} bands.`
-    : `Filtered to ${state.era} · ${total} band${total === 1 ? "" : "s"}.`;
+  $("#chart-subtitle").innerHTML = `${total} band${total === 1 ? "" : "s"} · 0 = every look different · 100 = one repeated look · <span class="inline-conf">○</span> = low confidence`;
+  const filters = [];
+  if (state.era !== "all") filters.push(state.era);
+  if (state.lowOnly) filters.push("low confidence only");
+  $("#filter-status").textContent = filters.length
+    ? `Filtered to ${filters.join(" + ")} · ${total} band${total === 1 ? "" : "s"}.`
+    : `Showing all ${total} bands.`;
 }
 
 /* ---------- ranking ---------- */
@@ -540,12 +582,14 @@ function renderRanking() {
     row.type = "button";
     row.className = "rank-row";
     row.dataset.id = band.id;
+    const low = band.members.length <= 4;
     row.innerHTML = `
       <span class="rank-no">${String(index + 1).padStart(2, "0")}</span>
       <span class="rank-body">
-        <span class="rank-name">${band.band}</span>
+        <span class="rank-name">${band.band} <span class="rank-n">n=${band.members.length}</span></span>
         <span class="rank-bar"><i style="width:${band.score}%"></i></span>
       </span>
+      <span class="confidence-dot ${low ? "is-low" : "is-solid"}" title="${low ? "Low confidence" : "Solid evidence"}" aria-label="${low ? "Low confidence" : "Solid evidence"}"></span>
       <span class="rank-val">${band.score}</span>`;
     row.addEventListener("pointerenter", () => setHovered(band.id));
     row.addEventListener("pointerleave", () => setHovered(null));
@@ -582,7 +626,7 @@ function closeDetail() {
   state.hovered = null;
   $("#detail").hidden = true;
   $("#connector").classList.remove("is-on");
-  $("#rail-sub").textContent = "Ranked by uniformity. Click any row to open a band.";
+  $("#rail-sub").textContent = "Ranked by formula strength. Click any row to open a band.";
   hideTooltip();
   updateHub();
   renderRanking();
@@ -604,11 +648,14 @@ function renderDetail(band) {
   $("#detail-era").textContent = `${band.era === "Undated" ? "Undated" : `Born ${band.era}`} · ${band.members.length} members`;
   $("#detail-score").textContent = band.score;
   $("#detail-count").textContent = `${band.members.length} people`;
+  const low = band.members.length <= 4;
+  $("#detail-conf").className = `detail-conf${low ? " is-low" : ""}`;
+  $("#detail-conf").innerHTML = `<i class="confidence-dot ${low ? "is-low" : "is-solid"}"></i>${low ? "Low confidence" : "Solid evidence"} · n=${band.members.length}`;
   $("#detail-summary").textContent = bandSummary(band);
 
-  $("#detail-rings").innerHTML = RING_METRICS.map(({ key, label }) => {
+  $("#detail-rings").innerHTML = RING_METRICS.map(({ key, label, color }) => {
     const m = band.metrics[key];
-    return `<div class="detail-ring"><span>${label}<em>${m.count}/${m.n}</em></span><i><b style="width:${m.ratio * 100}%"></b></i></div>`;
+    return `<div class="detail-ring"><span>${label}<em>${m.count}/${m.n}</em></span><i><b style="width:${m.ratio * 100}%;background:${color}"></b></i></div>`;
   }).join("");
 
   const sorted = [...band.members].sort((a, b) => memberOffTraits(band, b).length - memberOffTraits(band, a).length);
@@ -621,7 +668,7 @@ function renderDetail(band) {
       member.bottom !== "undocumented" ? member.bottom : null
     ].filter(Boolean);
     return `<li>
-      <span class="member-dot" style="background:${color}"></span>
+      <span class="member-dot${member.height ? "" : " is-missing"}" style="background:${color}"></span>
       <span>
         <span class="member-name">${member.name}</span>
         <span class="member-traits">${traits.map((t) => `<span>${t}</span>`).join("")}${off.map(({ label }) => `<span class="is-off">${label}</span>`).join("")}</span>
@@ -645,7 +692,7 @@ function setOrder(order) {
 
 function setEra(era) {
   state.era = era;
-  document.querySelectorAll(".chip").forEach((chip) => {
+  document.querySelectorAll(".chip[data-era]").forEach((chip) => {
     chip.classList.toggle("is-active", chip.dataset.era === era);
   });
   if (state.selected) {
@@ -655,9 +702,23 @@ function setEra(era) {
   render();
 }
 
+function setLowOnly(enabled) {
+  state.lowOnly = enabled;
+  $("#low-confidence").setAttribute("aria-pressed", String(enabled));
+  $("#low-confidence").classList.toggle("is-active", enabled);
+  if (state.selected) {
+    const band = state.bands.find((b) => b.id === state.selected);
+    if (band && enabled && band.members.length > 4) closeDetail();
+  }
+  render();
+}
+
 function resetView() {
   state.spotlight = false;
   $("#spotlight").setAttribute("aria-pressed", "false");
+  state.lowOnly = false;
+  $("#low-confidence").setAttribute("aria-pressed", "false");
+  $("#low-confidence").classList.remove("is-active");
   setEra("all");
   setOrder("chrono");
   closeDetail();
@@ -673,14 +734,16 @@ function wireControls() {
     if (chip) setEra(chip.dataset.era);
   });
 
+  $("#low-confidence").addEventListener("click", () => setLowOnly(!state.lowOnly));
+
   $("#spotlight").addEventListener("click", () => {
     state.spotlight = !state.spotlight;
     $("#spotlight").setAttribute("aria-pressed", String(state.spotlight));
     applyEmphasis();
     if (state.spotlight) {
-      $("#rail-sub").textContent = "The ten most uniform bands are spotlighted.";
+      $("#rail-sub").textContent = "The ten strongest formulas are spotlighted.";
     } else {
-      $("#rail-sub").textContent = "Ranked by uniformity. Click any row to open a band.";
+      $("#rail-sub").textContent = "Ranked by formula strength. Click any row to open a band.";
     }
   });
 
