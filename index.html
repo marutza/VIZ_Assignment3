@@ -12,30 +12,14 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="page-grid" aria-hidden="true"></div>
-
   <header class="hero">
-    <div class="hero-top">
-      <span class="stamp">VIZ / ASSIGNMENT 03</span>
-      <span class="stamp stamp-right">RADIAL STUDY № 01</span>
-    </div>
-    <p class="eyebrow">A field guide to the boyband look, 1960s–1990s</p>
     <h1>The Boyband<br><em>Blueprint</em></h1>
-    <div class="hero-bottom">
-      <p class="deck">Some bands wore one look. Others wore five. This dial measures <strong>how tightly each group enforced a visual formula</strong> — and opens the record when a member breaks formation. Ring length shows repetition, wedge depth shows band size; the era pattern is secondary, not the headline.</p>
-      <dl class="question-card">
-        <div><dt>Investigate</dt><dd>How tightly did each band enforce a visual formula?</dd></div>
-        <div><dt>Most important</dt><dd>Hair colour, hair length, shirt colour, trouser colour.</dd></div>
-        <div><dt>Notice first</dt><dd>Near-full rings: bands where almost everybody repeats the same look.</dd></div>
-        <div><dt>Then explore</dt><dd>Who broke each formula, and whether the evidence is strong.</dd></div>
-      </dl>
-    </div>
+    <p class="deck">Some bands wore one look. Others wore five. This dial measures <strong>how tightly each group enforced a visual formula</strong> — and opens the record when a member breaks formation. Ring length shows repetition, wedge depth shows band size; the era pattern is secondary, not the headline.</p>
   </header>
 
   <main>
     <section class="guide" aria-labelledby="guide-title">
       <div class="section-head">
-        <span class="figure-no">FIG. 01</span>
         <h2 id="guide-title">How to read the dial</h2>
         <p>A four-move reading path, from aggregate to individual.</p>
       </div>
@@ -93,36 +77,10 @@
       </div>
     </section>
 
-    <section class="encodings" aria-labelledby="encodings-title">
-      <div class="section-head">
-        <span class="figure-no">FIG. 02</span>
-        <h2 id="encodings-title">Marks and channels</h2>
-        <p>What each visual choice carries, and why.</p>
-      </div>
-      <div class="table-wrap">
-        <table class="encoding-table">
-          <thead><tr><th>Attribute</th><th>Mark</th><th>Channel</th><th>Why this choice</th></tr></thead>
-          <tbody>
-            <tr><td>Band identity</td><td>Wedge</td><td>Equal angle slot</td><td>Gives all 55 groups equal comparison space</td></tr>
-            <tr><td>Band size</td><td>Outer arc</td><td>Radial depth / length</td><td>Bigger bands visibly reach further out</td></tr>
-            <tr><td>Repeated hair colour</td><td>Ring fill</td><td>Length + crimson hue</td><td>Shows the share sharing one value</td></tr>
-            <tr><td>Repeated hair length</td><td>Ring fill</td><td>Length + amber hue</td><td>Keeps the four measures separately scannable</td></tr>
-            <tr><td>Repeated shirt colour</td><td>Ring fill</td><td>Length + teal hue</td><td>Costume coordination is central to the formula</td></tr>
-            <tr><td>Repeated trouser colour</td><td>Ring fill</td><td>Length + green hue</td><td>Completes the outfit comparison</td></tr>
-            <tr><td>Member</td><td>Dot</td><td>Position + hair-colour fill + size</td><td>Makes every aggregate auditable</td></tr>
-            <tr><td>Missing height</td><td>Hollow dot</td><td>Dark ring + central hair-colour pip</td><td>Missingness remains visible and does not erase hair colour</td></tr>
-            <tr><td>Evidence strength</td><td>Confidence badge</td><td>Solid / open marker + count</td><td>Stops a 100 from four people reading like a 100 from seven</td></tr>
-            <tr><td>Birth decade</td><td>Outer arc</td><td>Categorical hue</td><td>Adds cohort context without a false continuous scale</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
     <section class="workbench" aria-labelledby="chart-title">
       <div class="chart-col">
         <div class="chart-head">
           <div>
-            <span class="figure-no">FIG. 03</span>
             <h2 id="chart-title">The formula index</h2>
             <p id="chart-subtitle">55 bands · 0 = every look different · 100 = one repeated look · <span class="inline-conf">○</span> = 3–4 members</p>
           </div>
@@ -194,7 +152,6 @@
 
       <aside class="rail" aria-labelledby="rail-title">
         <div class="rail-head">
-          <span class="figure-no">FIG. 04</span>
           <h2 id="rail-title">The evidence ledger</h2>
           <p id="rail-sub">Ranked by formula strength. Click any row to open a band.</p>
         </div>
@@ -215,65 +172,28 @@
 
     <section class="reflection" aria-labelledby="reflection-title">
       <div class="section-head">
-        <span class="figure-no">FIG. 05</span>
-        <h2 id="reflection-title">Design reflection</h2>
-        <p>Eight decisions and a record of what the visualization cannot show.</p>
+        <h2 id="reflection-title">Key takeaways</h2>
       </div>
 
       <div class="reflection-grid">
         <article>
           <span>01</span>
-          <h3>Question and insight</h3>
-          <p>The visualization asks how tightly each band enforced a visual formula and who broke it. The pattern is uneven rather than binary: some groups present a single silhouette, others a rack of separate styling decisions. The ranking makes those extremes comparable.</p>
+          <h3>Formula strength</h3>
+          <p>Longer rings mean more members share the same visual traits.</p>
         </article>
         <article>
           <span>02</span>
-          <h3>Marks</h3>
-          <p>Arcs are structural: one wedge per band and four ring fills per wedge. Dots return the aggregate to individual people. A floating dossier carries names, hair swatches, height and off-formula flags without crowding the dial.</p>
+          <h3>Find the outlier</h3>
+          <p>Click a band to see which members break its majority look.</p>
         </article>
         <article>
           <span>03</span>
-          <h3>Channels</h3>
-          <p>Radius encodes band size; ring arc length encodes repetition; fixed ring hues identify which metric is being read; dot fill encodes hair colour and area encodes height. Confidence uses a text count plus solid/open marker so sample strength is not hidden.</p>
-        </article>
-        <article>
-          <span>04</span>
-          <h3>Arc structure</h3>
-          <p>Equal angles give every band the same reading space. The outer arc is a radial bar for member count, while the inner arcs are four proportional scales. The circle organises comparison; the arcs carry the data rather than decorate it.</p>
-        </article>
-        <article>
-          <span>05</span>
-          <h3>Included attributes</h3>
-          <p>Hair colour, hair length, shirt colour and trouser colour are consistently documented and quick to verify in the source photographs. Member count is essential context. Height is secondary and appears only in the dossier and dot area.</p>
-        </article>
-        <article>
-          <span>06</span>
-          <h3>Excluded attributes</h3>
-          <p>Eye colour, accessories, instruments and facial hair were excluded because they are too detailed, inconsistent, or heavily missing for the dial. Exact colour names are collapsed into shared categories, so a shared black shirt and a shared silver shirt count the same.</p>
-        </article>
-        <article>
-          <span>07</span>
-          <h3>Interaction</h3>
-          <p>Hover isolates a wedge; click lifts it out and opens the dossier. Ranking and filtering test whether the pattern survives a different view. The low-confidence filter exposes the coarsest scores. Escape and close return focus to the slice.</p>
-        </article>
-        <article>
-          <span>08</span>
-          <h3>What to improve</h3>
-          <p>A next version would use debut dates instead of birth years, add outfit-family grouping, show source photographs and allow two-band comparison. It would also test the index with a larger, more balanced cohort sample.</p>
+          <h3>Read with context</h3>
+          <p>Open markers indicate smaller groups, so their scores are less certain.</p>
         </article>
       </div>
-
-      <aside class="limitations">
-        <span>LIMITATIONS</span>
-        <p>Birth decade is a proxy for era, cohort sizes are uneven, height is missing for half the members, and the index weights four documented traits equally. The 1960s→1990s difference is suggestive, not statistical.</p>
-      </aside>
     </section>
   </main>
-
-  <footer>
-    <span>Source: <em>boys.csv</em>, 234 documented members across 55 groups.</span>
-    <span>Built with D3 v7 · Hand-in 3 · The Boyband Blueprint</span>
-  </footer>
 
   <script src="d3.v7.min.js"></script>
   <script src="boys-data.js"></script>

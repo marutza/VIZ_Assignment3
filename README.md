@@ -16,7 +16,7 @@ Running it through a server (`python -m http.server 8123`, or `Open Assignment3.
 
 ## Files
 
-- `index.html` — page structure, reading guide, marks/channels table, chart, evidence ledger, reflection and limitations
+- `index.html` — page structure, reading guide, chart, evidence ledger, reflection and limitations
 - `styles.css` — editorial layout, legends, responsive states and SVG styling
 - `main.js` — data preparation, radial geometry, encodings, confidence logic and interaction
 - `boys.csv` — source dataset

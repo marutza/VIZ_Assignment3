@@ -34,51 +34,12 @@ body {
 
 button { font: inherit; color: inherit; }
 
-.page-grid {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  opacity: .35;
-  background-image:
-    linear-gradient(90deg, rgba(23,25,29,.08) 1px, transparent 1px),
-    linear-gradient(rgba(23,25,29,.08) 1px, transparent 1px);
-  background-size: 80px 80px;
-  mask-image: linear-gradient(to bottom, #000, transparent 70%);
-}
-
-.hero, main, footer { position: relative; z-index: 1; }
+.hero, main { position: relative; z-index: 1; }
 
 .hero {
   max-width: 1580px;
   margin: 0 auto;
-  padding: 34px clamp(24px, 4vw, 64px) 44px;
-  border-bottom: 2px solid var(--ink);
-}
-
-.hero-top {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  border-bottom: 1px solid var(--rule);
-  padding-bottom: 10px;
-}
-
-.stamp {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: .14em;
-}
-
-.stamp::before { content: "●"; color: var(--red); margin-right: 7px; }
-
-.eyebrow {
-  margin: 34px 0 6px;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--muted);
+  padding: 48px clamp(24px, 4vw, 64px) 44px;
 }
 
 h1 {
@@ -92,63 +53,25 @@ h1 {
 
 h1 em { color: var(--red); font-weight: 400; }
 
-.hero-bottom {
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(280px, .7fr);
-  gap: clamp(30px, 6vw, 100px);
-  align-items: end;
-  margin-top: 42px;
-}
-
 .deck {
   max-width: 800px;
-  margin: 0;
+  margin: 42px 0 0;
   font-size: clamp(16px, 1.5vw, 21px);
   line-height: 1.5;
 }
 
 .deck strong { box-shadow: inset 0 -.35em var(--yellow); }
 
-.question-card {
-  margin: 0;
-  border-top: 2px solid var(--ink);
-}
-
-.question-card div {
-  display: grid;
-  grid-template-columns: 92px 1fr;
-  gap: 12px;
-  padding: 9px 0;
-  border-bottom: 1px solid var(--rule);
-}
-
-.question-card dt {
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: var(--red);
-}
-
-.question-card dd { margin: 0; font-size: 12px; line-height: 1.4; }
-
 main { max-width: 1580px; margin: 0 auto; padding: 0 clamp(24px, 4vw, 64px); }
 
-.guide, .reflection { padding: 42px 0 48px; border-bottom: 2px solid var(--ink); }
+.guide, .reflection { padding: 42px 0 48px; }
 
 .section-head {
   display: grid;
-  grid-template-columns: 90px 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 18px;
   align-items: baseline;
   margin-bottom: 26px;
-}
-
-.figure-no {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: .12em;
-  color: var(--red);
 }
 
 .section-head h2 {
@@ -196,14 +119,6 @@ main { max-width: 1580px; margin: 0 auto; padding: 0 clamp(24px, 4vw, 64px); }
 .hair-legend li, .era-legend li, .ring-legend li { display: flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 9.5px; }
 .hair-legend i { width: 9px; height: 9px; border-radius: 50%; flex: none; border: 1px solid rgba(0,0,0,.25); }
 .era-legend i, .ring-legend i { width: 20px; height: 6px; flex: none; }
-
-.encodings { padding: 38px 0 42px; border-bottom: 2px solid var(--ink); }
-.table-wrap { overflow-x: auto; border-top: 1px solid var(--ink); }
-.encoding-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
-.encoding-table th { padding: 9px 10px; text-align: left; font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--ink); }
-.encoding-table td { padding: 8px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
-.encoding-table td:first-child { font-weight: 600; }
-.encoding-table tr:nth-child(even) { background: rgba(251,248,241,.42); }
 
 .guide-grid {
   display: grid;
@@ -264,7 +179,6 @@ main { max-width: 1580px; margin: 0 auto; padding: 0 clamp(24px, 4vw, 64px); }
   display: grid;
   grid-template-columns: minmax(0, 1fr) 370px;
   gap: 0;
-  border-bottom: 2px solid var(--ink);
 }
 
 .chart-col { padding: 38px 34px 28px 0; border-right: 1px solid var(--ink); }
@@ -572,18 +486,6 @@ main { max-width: 1580px; margin: 0 auto; padding: 0 clamp(24px, 4vw, 64px); }
 .limitations span { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; color: var(--red); }
 .limitations p { margin: 0; font-size: 11.5px; color: var(--muted); }
 
-footer {
-  max-width: 1580px;
-  margin: 0 auto;
-  padding: 22px clamp(24px, 4vw, 64px) 40px;
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--muted);
-}
-
 /* SVG */
 .chart-root { animation: chart-in .32s ease-out; transform-origin: 480px 480px; }
 @keyframes chart-in { from { opacity: .25; transform: rotate(-1.2deg); } to { opacity: 1; transform: rotate(0); } }
@@ -630,14 +532,12 @@ footer {
 }
 
 @media (max-width: 1100px) {
-  .hero-bottom { grid-template-columns: 1fr; }
   .workbench { grid-template-columns: 1fr; }
   .chart-col { border-right: 0; padding-right: 0; }
   .rail { border-top: 1px solid var(--ink); padding: 26px 0; min-height: 0; }
   .ranking { max-height: 360px; }
   .reflection-grid { grid-template-columns: 1fr 1fr; }
-  .section-head { grid-template-columns: 70px 1fr; }
-  .section-head p { grid-column: 2; }
+  .section-head { grid-template-columns: 1fr 1fr; }
   .reading-strip { grid-template-columns: 1fr 1fr; }
   .band-label { display: none; }
 }
@@ -651,9 +551,10 @@ footer {
   .guide-card { min-height: 170px; }
   .guide-card h3 { margin-top: 46px; }
   .reflection-grid { grid-template-columns: 1fr; }
-  .hero { padding-top: 20px; }
+  .section-head { grid-template-columns: 1fr; }
+  .section-head p { grid-column: auto; }
+  .hero { padding-top: 32px; }
   h1 { font-size: clamp(58px, 18vw, 90px); }
-  .stamp-right { display: none; }
   .chart-head { align-items: flex-start; }
   .chart-foot { display: block; }
   .filter-status { text-align: left; margin-top: 7px; }
@@ -665,6 +566,5 @@ footer {
   .connector { display: none; }
   .band-label, .ring-label, .score-label { display: none; }
   .stage-corner { display: none; }
-  footer { display: block; }
-  footer span { display: block; margin-top: 5px; }
+
 }
