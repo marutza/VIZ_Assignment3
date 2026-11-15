@@ -133,17 +133,29 @@ async function loadData() {
     const available = RING_METRICS.map(({ key }) => metrics[key].ratio).filter((_, i) => metrics[RING_METRICS[i].key].n > 0);
     const score = Math.round(100 * (available.length ? mean(available) : 0));
 
-    return {
-      id: slug(band),
-      band,
-      era,
-      years,
-      medianYear: years.length ? median(years) : 9999,
-      members: normalized,
-      metrics,
-      score,
-      top10: false
-    };
+    const documented = RING_METRICS.reduce(
+      (sum, { key }) => sum + metrics[key].n,
+         0
+      );
+
+    const possible = normalized.length * RING_METRICS.length;
+
+    const coverage = possible
+      ? Math.round((documented / possible) * 100)
+      : 0;
+
+        return {
+          id: slug(band),
+          band,
+          era,
+          years,
+          medianYear: years.length ? median(years) : 9999,
+          members: normalized,
+          metrics,
+          score,
+          coverage,
+          top10: false
+        };
   });
 
   state.bands.sort((a, b) => a.medianYear - b.medianYear || a.band.localeCompare(b.band));
@@ -586,7 +598,12 @@ function renderRanking() {
     row.innerHTML = `
       <span class="rank-no">${String(index + 1).padStart(2, "0")}</span>
       <span class="rank-body">
-        <span class="rank-name">${band.band} <span class="rank-n">n=${band.members.length}</span></span>
+      <span class="rank-name">
+        ${band.band}
+        <span class="rank-n">
+          n=${band.members.length} · ${band.coverage}% documented
+        </span>
+      </span>
         <span class="rank-bar"><i style="width:${band.score}%"></i></span>
       </span>
       <span class="confidence-dot ${low ? "is-low" : "is-solid"}" title="${low ? "Low confidence" : "Solid evidence"}" aria-label="${low ? "Low confidence" : "Solid evidence"}"></span>
@@ -651,7 +668,11 @@ function renderDetail(band) {
   const low = band.members.length <= 4;
   $("#detail-conf").className = `detail-conf${low ? " is-low" : ""}`;
   $("#detail-conf").innerHTML = `<i class="confidence-dot ${low ? "is-low" : "is-solid"}"></i>${low ? "Low confidence" : "Solid evidence"} · n=${band.members.length}`;
-  $("#detail-summary").textContent = bandSummary(band);
+  $("#detail-summary").textContent =
+  `${bandSummary(band)} ` +
+  `Data completeness: ${band.coverage}%. ` +
+  `The formula score only uses documented values. ` +
+  `Missing values are excluded from the agreement calculation.`;
 
   $("#detail-rings").innerHTML = RING_METRICS.map(({ key, label, color }) => {
     const m = band.metrics[key];
