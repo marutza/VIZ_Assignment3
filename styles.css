@@ -376,7 +376,12 @@ main { max-width: 1580px; margin: 0 auto; padding: 0 clamp(24px, 4vw, 64px); }
 
 #chart { width: 100%; height: 100%; display: block; overflow: visible; cursor: crosshair; }
 
-.band { transition: transform .38s cubic-bezier(.2,.82,.25,1), opacity .2s ease; }
+.band {
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform;
+  transition: transform .55s cubic-bezier(.16,1,.3,1), opacity .25s ease;
+}
 .band:focus { outline: none; }
 .band:focus-visible .band-arc { stroke: var(--red); stroke-width: 2.5; }
 @media (prefers-reduced-motion: reduce) {
@@ -592,30 +597,30 @@ footer {
 @keyframes chart-in { from { opacity: .25; transform: rotate(-1.2deg); } to { opacity: 1; transform: rotate(0); } }
 
 .ring-track { stroke: var(--rule); stroke-width: .5; }
-.ring-fill { fill: none; }
+.ring-fill { fill: none; transition: filter .4s ease; }
 .ring-tick { stroke: var(--ink); stroke-width: .7; opacity: .18; }
 .ring-label-key { font-family: var(--mono); font-size: 8px; fill: var(--muted); }
-.band-arc { stroke: var(--paper); stroke-width: 1.6; cursor: pointer; transition: filter .15s, opacity .2s; }
+.band-arc { stroke: var(--paper); stroke-width: 1.6; cursor: pointer; transition: filter .4s ease, opacity .25s ease; }
 .band-arc:hover, .band-arc:focus { filter: brightness(1.18); outline: none; }
 .band-hit { fill: transparent; cursor: pointer; }
 .axis-circle { fill: none; stroke: var(--rule); stroke-dasharray: 1 5; }
 .axis-spoke { stroke: var(--rule); stroke-width: .5; }
-.band-label { font-family: var(--mono); font-size: 10.5px; fill: var(--ink); cursor: pointer; }
+.band-label { font-family: var(--mono); font-size: 10.5px; fill: var(--ink); cursor: pointer; transition: fill .3s ease; }
 .band-label:hover { fill: var(--red); }
 .score-label { font-family: var(--mono); font-size: 9.5px; fill: var(--muted); }
-.member-dot { stroke: var(--paper); stroke-width: 2; paint-order: stroke; }
+.member-dot { stroke: var(--paper); stroke-width: 2; paint-order: stroke; transition: stroke-width .35s ease; }
 .member-dot.is-missing { fill: var(--paper); stroke: var(--ink); stroke-width: 1.4; paint-order: normal; }
 .member-pip { stroke: none; pointer-events: none; }
 .empty-note { font-family: var(--mono); font-size: 12px; fill: var(--muted); }
 .band-spoke { stroke: var(--rule); stroke-width: .6; }
 .ring-label { display: none; font-family: var(--mono); font-size: 9.5px; fill: var(--muted); letter-spacing: .06em; paint-order: stroke; stroke: var(--paper); stroke-width: 3px; stroke-linejoin: round; }
 .dim { opacity: .25 !important; }
-.hot .band-arc { filter: brightness(1.1) drop-shadow(0 4px 3px rgba(23,25,29,.24)); }
+.hot .band-arc { filter: brightness(1.12) drop-shadow(0 8px 7px rgba(23,25,29,.3)); }
 .hot .band-label { fill: var(--red); font-weight: 500; }
 .hot .band-spoke { stroke: var(--ink); }
 .hot .ring-fill { filter: brightness(1.12); }
-.hot .member-dot { stroke-width: 2.4; }
-.is-selected-band .band-arc { stroke: var(--ink); stroke-width: 2.4; filter: drop-shadow(0 3px 0 rgba(23,25,29,.2)); }
+.hot .member-dot { stroke-width: 2.6; }
+.is-selected-band .band-arc { stroke: var(--ink); stroke-width: 2.4; filter: drop-shadow(0 10px 8px rgba(23,25,29,.34)); }
 .is-selected-band .band-label, .is-selected-band .score-label { opacity: 0; }
 .is-selected-band .band-spoke { stroke: var(--ink); }
 .is-off-formula { stroke: var(--red) !important; stroke-width: 1.8 !important; }
