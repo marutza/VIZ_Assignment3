@@ -40,7 +40,7 @@ The angle is a categorical slot for each band. The exact values of all four ring
 
 **Interactions**
 
-- Hover a wedge to lift that slice toward the viewer and read its rings; other slices stay at full strength. The evidence ledger follows and scrolls back to its previous position on leave.
+- Hover a wedge: it lifts clear of the hub and the other slices fade, so every ring and dot of that band stays readable. The tooltip parks outside the wedge instead of covering it, and the evidence ledger follows and scrolls back to its previous position on leave.
 - Click a wedge (or ledger row) to pull that slice forward and open a floating member card with off-formula traits.
 - Reorder by chronology or formula rank.
 - Filter by birth decade or to low-confidence bands.

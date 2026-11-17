@@ -268,22 +268,7 @@ function render() {
       .attr("class", "axis-spoke");
   }
 
-  // Ring labels, top-left quadrant.
   const angle = slotAngles(state.visible.length);
-  const ringLabels = root.append("g").attr("aria-hidden", "true");
-  const labelAt = -Math.PI / 2 - 0.58;
-  RING_METRICS.forEach((metric, idx) => {
-    const sx = CX + Math.cos(labelAt) * (metric.radius - 7);
-    const sy = CY + Math.sin(labelAt) * (metric.radius - 7);
-    const rot = (labelAt * 180) / Math.PI + 90;
-    ringLabels.append("text")
-      .attr("class", "ring-label")
-      .attr("style", `fill:${metric.color}`)
-      .attr("x", sx).attr("y", sy)
-      .attr("text-anchor", "middle")
-      .attr("transform", `rotate(${rot} ${sx} ${sy})`)
-      .text(`${idx + 1} ${metric.label}`);
-  });
 
   const bandLayer = root.append("g").attr("class", "bands");
 
@@ -300,7 +285,7 @@ function render() {
     group.append("path")
       .attr("class", "band-hit")
       .attr("transform", `translate(${CX} ${CY})`)
-      .attr("d", arcPath(90, 344, start, end));
+      .attr("d", arcPath(64, 344, start, end));
 
     // Spoke through the member column.
     group.append("line")
@@ -393,7 +378,7 @@ function render() {
     // Events.
     group
       .on("pointerenter", (event) => { setHovered(band.id, "chart"); showTooltip(event, band); })
-      .on("pointermove", (event) => moveTooltip(event))
+      .on("pointermove", () => placeTooltip(band))
       .on("pointerleave", () => { setHovered(null); hideTooltip(); })
       .on("click", (event) => { event.stopPropagation(); selectBand(band.id); })
       .on("keydown", (event) => {
@@ -403,8 +388,6 @@ function render() {
         }
       });
   });
-
-  ringLabels.raise();
 
   const dotCount = root.selectAll(".member-dot").size();
   svg.attr("data-dot-count", dotCount).attr("data-dot-expected", state.visible.reduce((sum, band) => sum + band.members.length, 0));
@@ -482,6 +465,7 @@ function restoreRankingScroll() {
 function applyEmphasis() {
   const top10 = visibleTop10();
   const focus = new Set([state.hovered, state.selected].filter(Boolean));
+  $("#hub").classList.toggle("is-focus", focus.size > 0);
 
   d3.selectAll(".band").each(function () {
     const id = this.dataset.id;
@@ -493,8 +477,15 @@ function applyEmphasis() {
     g.classed("is-selected-band", state.selected === id);
     g.attr("aria-pressed", state.selected === id ? "true" : "false");
 
-    const lift = state.selected === id ? 1.11 : state.hovered === id ? 1.075 : 1;
-    g.style("transform", `scale(${lift})`);
+    const lift = state.selected === id ? 1.055 : state.hovered === id ? 1.035 : 1;
+    const pop = state.selected === id ? 16 : state.hovered === id ? 10 : 0;
+    const index = state.visible.findIndex((b) => b.id === id);
+    const mid = index >= 0 ? slotAngles(state.visible.length)(index).mid : 0;
+    const transform = pop
+      ? `translate(${(Math.cos(mid) * pop).toFixed(2)}px, ${(Math.sin(mid) * pop).toFixed(2)}px) scale(${lift})`
+      : "scale(1)";
+    g.classed("is-muted", !!state.hovered && !isFocus);
+    g.style("transform", transform);
 
     if (state.selected === id) {
       const band = state.bands.find((b) => b.id === id);
@@ -583,16 +574,31 @@ function showTooltip(event, band) {
   const low = band.members.length <= 4;
   tt.innerHTML = `<strong>${band.band}</strong>${band.members.length} members${low ? " · <span class=\"tt-low\">low confidence</span>" : ""}<br><span class="tt-score">${band.score}/100 formula</span><br>click to inspect`;
   tt.classList.add("is-on");
-  moveTooltip(event);
+  placeTooltip(band);
 }
 
-function moveTooltip(event) {
-  const stage = $("#stage").getBoundingClientRect();
+// Park the tooltip just outside the band's own wedge so it never covers the
+// rings or member dots the reader is trying to inspect.
+function placeTooltip(band) {
+  const stage = $("#stage");
   const tt = $("#tooltip");
-  const x = Math.min(event.clientX - stage.left, stage.width - 250);
-  const y = Math.min(event.clientY - stage.top, stage.height - 100);
-  tt.style.left = `${Math.max(0, x)}px`;
-  tt.style.top = `${Math.max(0, y)}px`;
+  const width = stage.clientWidth;
+  const height = stage.clientHeight;
+  if (!width || !height) return;
+  const index = state.visible.findIndex((b) => b.id === band.id);
+  if (index < 0) return;
+  const mid = slotAngles(state.visible.length)(index).mid;
+  const scale = width / 960;
+  const px = width / 2 + Math.cos(mid) * 376 * scale;
+  const py = height / 2 + Math.sin(mid) * 376 * scale;
+  const w = tt.offsetWidth;
+  const h = tt.offsetHeight;
+  const left = Math.max(6, Math.min(px - w / 2, width - w - 6));
+  const top = Math.sin(mid) > 0.35
+    ? Math.max(6, py - h - 10)
+    : Math.min(py + 6, height - h - 6);
+  tt.style.left = `${left}px`;
+  tt.style.top = `${top}px`;
 }
 
 function hideTooltip() { $("#tooltip").classList.remove("is-on"); }
